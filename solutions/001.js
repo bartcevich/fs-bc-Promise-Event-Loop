@@ -21,38 +21,34 @@ function fetchUserTweets() {
   });
 }
 
+function forError() {
+  return Promise.reject("Ошибка!");
+}
+
 function fetchUserFollowers() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(15000);
-    }, 500); 
+    }, 2000); 
   });
 }
 
 async function loadUserProfile() {
-  try {
-    const userInfo = await fetchUserInfo();
-    const userTweets = await fetchUserTweets();
-    const userFollowers = await fetchUserFollowers();
+  const [userInfo, getError, tweets, followers,] = await Promise.allSettled([
+         fetchUserInfo(),
+         forError(),
+         fetchUserTweets(),
+         fetchUserFollowers(),
+     ]);
+    console.log(followers?.status, followers?.value); 
+    console.log(userInfo?.status, userInfo?.value);
+    console.log(getError?.status, getError?.reason); 
+    console.log(tweets?.status, tweets?.value);       
+    }
 
-    console.log(`Твиты:`);
-    userTweets.forEach((tweet, index) => {
-      console.log(`${index + 1}: ${tweet}`);
-    });
-    console.log(`Имя: ${userInfo.name}`);
-    console.log(`Биография: ${userInfo.bio}`);
-    console.log(`Количество подписчиков: ${userFollowers}`);
-    
-  } catch (error) {
-    console.error("Произошла ошибка при загрузке профиля:", error);
-  }
-}
-
-loadUserProfile(); 
-/*Твиты:
-main.js:40 1: Коммичу в пятницу вечером. Что может пойти не так?
-main.js:40 2: Баг или фича? 🤔 #программирование
-main.js:40 3: Рефакторинг старого кода - это как археология.
-main.js:42 Имя: Алекс Алгоритмов
-main.js:43 Биография: Строю будущее, по одному циклу за раз.
-main.js:44 Количество подписчиков: 15000*/
+loadUserProfile();
+/*fulfilled 15000
+main.js:44 fulfilled {name: 'Алекс Алгоритмов', bio: 'Строю будущее, по одному циклу за раз.'}
+main.js:45 rejected Ошибка!
+main.js:46 fulfilled (3) ['Коммичу в пятницу вечером. Что может пойти не так?', 
+'Баг или фича? 🤔 #программирование', 'Рефакторинг старого кода - это как археология.']*/
